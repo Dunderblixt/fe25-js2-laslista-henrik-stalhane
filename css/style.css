@@ -1,0 +1,10 @@
+#booklist {
+    list-style-type: none;
+    padding: 20px;
+}   
+.book-item {
+    margin-bottom: 10px;
+    padding: 10px;
+    width: 300px;
+    border: 1px solid #ccc;
+}
