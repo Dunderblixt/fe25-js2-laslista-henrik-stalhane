@@ -83,6 +83,7 @@ export class Book {
             }
         } catch (error) {
             console.error('Error updating favorite status:', error);
+            alert('Error updating favorite status');
         }
     }
 
