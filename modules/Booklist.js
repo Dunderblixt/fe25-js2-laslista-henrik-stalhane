@@ -65,7 +65,6 @@ export class Book {
             button.classList.add('hidden');
         }
         
-        // Update color immediately
         const bookDiv = button.parentElement;
         if (bookDiv) {
             bookDiv.style.color = this.#isFavorite ? 'green' : 'black';
@@ -88,3 +87,4 @@ export class Book {
     }
 
 }
+

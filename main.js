@@ -1,11 +1,29 @@
 import { Book } from "./modules/Booklist.js";  
-import { getAll, addBook } from "./modules/firebase.js";
+import { getAll, addBook} from "./modules/firebase.js";
 
-const form = document.getElementById('book-form');
+//declarations
 let books = [];
-const bookContainer = document.getElementById('book-container');
 let onlyFavorites = false;
 let currentSort = null;
+const form = document.getElementById('book-form');
+const bookContainer = document.getElementById('book-container');
+const sortAZBtn = document.getElementById('sort-az-btn');
+const sortZABtn = document.getElementById('sort-za-btn');
+const sortOldestBtn = document.getElementById('sort-oldest-btn');
+const sortYoungestBtn = document.getElementById('sort-youngest-btn');
+const onlyFavoritesBtn = document.getElementById('only-favorites-btn');
+const showAllBtn = document.getElementById('show-all-btn');
+
+const loadBooks = data => {
+    books = [];
+    const sortedData = applySorting(data);
+    const filteredData = filterDataByFavorites(sortedData);
+    for (const key in filteredData) {
+        books.push(new Book(key, filteredData[key].title, filteredData[key].isFavorite, filteredData[key].author));
+    }
+    bookContainer.innerHTML = '';
+    books.forEach(book => book.render(bookContainer));
+};
 
 const applySorting = data => {
     if (!currentSort) return data;
@@ -30,35 +48,6 @@ const filterDataByFavorites = data => {
     }
     return filteredData;
 };
-
-const loadBooks = data => {
-    books = [];
-    const sortedData = applySorting(data);
-    const filteredData = filterDataByFavorites(sortedData);
-    for (const key in filteredData) {
-        books.push(new Book(key, filteredData[key].title, filteredData[key].isFavorite, filteredData[key].author));
-    }
-    bookContainer.innerHTML = '';
-    books.forEach(book => book.render(bookContainer));
-}
-
-getAll()
-    .then(loadBooks)
-
-form.addEventListener('submit', event => {
-    event.preventDefault();
-    const newBook = form['book-input'].value.trim();
-    const newAuthor = form['author-input'].value.trim();
-    if (newBook && newAuthor) {
-        books = [];
-        addBook(newBook, newAuthor)
-            .then(() => getAll())
-            .then(loadBooks);
-        form.reset();
-    }
-});
-
-
 
 const sortDataByTitle = (data, direction = 'asc') => {
     const entries = Object.entries(data || {});
@@ -88,12 +77,34 @@ const orderByInsertion = (data, youngestFirst = false) => {
     return orderedData;
 };
 
-const sortAZBtn = document.getElementById('sort-az-btn');
-const sortZABtn = document.getElementById('sort-za-btn');
-const sortOldestBtn = document.getElementById('sort-oldest-btn');
-const sortYoungestBtn = document.getElementById('sort-youngest-btn');
-const onlyFavoritesBtn = document.getElementById('only-favorites-btn');
-const showAllBtn = document.getElementById('show-all-btn');
+// event listeners
+form.addEventListener('submit', event => {
+    event.preventDefault();
+    const newBook = form['book-input'].value.trim();
+    const newAuthor = form['author-input'].value.trim();
+    if (newBook && newAuthor) {
+        books = [];
+        addBook(newBook, newAuthor)
+            .then(() => getAll())
+            .then(loadBooks);
+        form.reset();
+    }
+});
+
+onlyFavoritesBtn.addEventListener('click', () => {
+    onlyFavorites = true;
+    books = [];
+    getAll()
+        .then(loadBooks);
+});
+
+showAllBtn.addEventListener('click', () => {
+    onlyFavorites = false;
+    books = [];
+    getAll()
+        .then(loadBooks);
+});
+
 if (sortAZBtn) {
     sortAZBtn.addEventListener('click', () => {
         currentSort = 'az';
@@ -126,17 +137,7 @@ if (sortYoungestBtn) {
     });
 }
 
+// initial load
 
-onlyFavoritesBtn.addEventListener('click', () => {
-    onlyFavorites = true;
-    books = [];
-    getAll()
-        .then(loadBooks);
-});
-
-showAllBtn.addEventListener('click', () => {
-    onlyFavorites = false;
-    books = [];
-    getAll()
-        .then(loadBooks);
-});
+getAll()
+    .then(loadBooks)
